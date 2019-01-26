@@ -463,7 +463,7 @@ void monero_transfer_utils::create_transaction(
 	//
 	uint32_t fake_outputs_count = fixed_mixinsize();
 	bool bulletproof = true;
-	const rct::RangeProofType range_proof_type = bulletproof && use_fork_rules_fn(6, 0) ? rct::RangeProofPaddedBulletproof : bulletproof ? rct::RangeProofMultiOutputBulletproof : rct::RangeProofBorromean;
+	const rct::RangeProofType range_proof_type = (bulletproof && use_fork_rules_fn(6, 0)) ? rct::RangeProofPaddedBulletproof : bulletproof ? rct::RangeProofMultiOutputBulletproof : rct::RangeProofBorromean;
 	//
 	if (mix_outs.size() != outputs.size() && fake_outputs_count != 0) {
 		retVals.errCode = wrongNumberOfMixOutsProvided;

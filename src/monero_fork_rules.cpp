@@ -51,8 +51,8 @@ namespace monero_fork_rules {
 		else if (version == 3) return 54901;
 		else if (version == 4) return 110000;
 		else if (version == 5) return 140000;
-		else if (version == 6) return 234903;
-		else if (version == 7) return 235000;
+		else if (version == 6) return 268000;
+		else if (version == 7) return 268720;
 		else return -1;
 	}
 }

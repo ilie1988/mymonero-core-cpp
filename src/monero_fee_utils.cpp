@@ -213,8 +213,7 @@ uint64_t monero_fee_utils::estimate_tx_weight(bool use_rct, int n_inputs, int mi
 }
 uint64_t monero_fee_utils::estimate_fee(bool use_per_byte_fee, bool use_rct, int n_inputs, int mixin, int n_outputs, size_t extra_size, bool bulletproof, uint64_t base_fee, uint64_t fee_multiplier, uint64_t fee_quantization_mask)
 {
-	use_fork_rules_fn_type use_fork_rules_fn;
-	if (use_per_byte_fee && use_fork_rules_fn(6, 0))
+	if (use_per_byte_fee && lightwallet_hardcoded__use_fork_rules(6, 0)/*TODOREMOVE*/)
 	{
 		const size_t estimated_tx_weight = estimate_tx_weight(use_rct, n_inputs, mixin, n_outputs, extra_size, bulletproof);
 		return calculate_fee_from_weight(base_fee, estimated_tx_weight, fee_multiplier, fee_quantization_mask);
@@ -234,8 +233,7 @@ uint64_t monero_fee_utils::calculate_fee_from_weight(uint64_t base_fee, uint64_t
 }
 uint64_t monero_fee_utils::calculate_fee(bool use_per_byte_fee, const cryptonote::transaction &tx, size_t blob_size, uint64_t base_fee, uint64_t fee_multiplier, uint64_t fee_quantization_mask)
 {
-	use_fork_rules_fn_type use_fork_rules_fn;
-	if (use_per_byte_fee && use_fork_rules_fn(6, 0))
+	if (use_per_byte_fee && lightwallet_hardcoded__use_fork_rules(6, 0)/*TODOREMOVE*/)
 	{
 		return calculate_fee_from_weight(base_fee, cryptonote::get_transaction_weight(tx, blob_size), fee_multiplier, fee_quantization_mask);
 	} else {
@@ -249,14 +247,13 @@ uint64_t monero_fee_utils::calculate_fee(bool use_per_byte_fee, const cryptonote
 //}
 uint64_t monero_fee_utils::calculate_fee_from_size(uint64_t fee_per_b, size_t bytes, uint64_t fee_multiplier)
 {
-	use_fork_rules_fn_type use_fork_rules_fn;
-	uint64_t kB = (bytes + 1023) / 1024;
-	if (use_fork_rules_fn(6, 0))
+	if (lightwallet_hardcoded__use_fork_rules(6, 0)/*TODOREMOVE*/)
 	{
-    return kB * fee_per_b * fee_multiplier;
+	return bytes * fee_per_b * fee_multiplier;
 	}
 	else
 	{
-	return bytes * fee_per_b * fee_multiplier;
+	uint64_t kB = (bytes + 1023) / 1024;
+    return kB * fee_per_b * fee_multiplier;
 	}
 }
