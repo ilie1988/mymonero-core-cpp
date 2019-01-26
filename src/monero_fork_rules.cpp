@@ -34,11 +34,37 @@
 //
 //
 #include "monero_fork_rules.hpp"
+
+namespace monero_fork_rules {
+	namespace detail {
+		uint64_t current_blockchain_height = 0;
+	}
+	void set_current_blockchain_height(uint64_t height) {
+		detail::current_blockchain_height = height;
+	}
+	uint64_t get_current_blockchain_height() {
+		return detail::current_blockchain_height;
+	}
+	uint64_t get_hardfork_earliest_height(uint8_t version) {
+		if (version <= 1) return 0;
+		else if (version == 2) return 23001;
+		else if (version == 3) return 54901;
+		else if (version == 4) return 110000;
+		else if (version == 5) return 140000;
+		else if (version == 6) return 234903;
+		else if (version == 7) return 235000;
+		else return -1;
+	}
+}
 //
 using namespace monero_fork_rules;
 //
 bool monero_fork_rules::lightwallet_hardcoded__use_fork_rules(uint8_t version, int64_t early_blocks)
 {
+	uint64_t height = get_current_blockchain_height();
+	uint64_t earliest_height = get_hardfork_earliest_height(version);
+	bool close_enough = height >= earliest_height - early_blocks; // start using the rules that many blocks beforehand
+	return close_enough;
 	return true; // TODO - we don't have the actual fork rules from thje lightwallet server yet
 	//
 	// full wallets do:
@@ -59,7 +85,7 @@ bool monero_fork_rules::lightwallet_hardcoded__use_fork_rules(uint8_t version, i
 // Protocol / Defaults
 uint32_t monero_fork_rules::fixed_ringsize()
 {
-	return 11; // v8
+	return 3; // v6
 }
 uint32_t monero_fork_rules::fixed_mixinsize()
 {
@@ -67,5 +93,5 @@ uint32_t monero_fork_rules::fixed_mixinsize()
 }
 uint64_t monero_fork_rules::dust_threshold()
 {
-	return 2000000000;
+	return 10000;
 }

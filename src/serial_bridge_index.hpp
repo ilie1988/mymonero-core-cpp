@@ -73,6 +73,7 @@ namespace serial_bridge
 	string decodeRct(const string &args_string);
 	string decodeRctSimple(const string &args_string);
 	string encrypt_payment_id(const string &args_string);
+	string set_current_blockchain_height(const string &args_string);
 }
 
 #endif /* serial_bridge_index_hpp */

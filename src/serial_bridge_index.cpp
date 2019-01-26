@@ -813,3 +813,16 @@ string serial_bridge::encrypt_payment_id(const string &args_string)
 	root.put(ret_json_key__generic_retVal(), epee::string_tools::pod_to_hex(payment_id));
 	return ret_json_from_root(root);
 }
+string serial_bridge::set_current_blockchain_height(const string &args_string)
+{
+	boost::property_tree::ptree json_root;
+	if (!parsed_json_root(args_string, json_root)) {
+		// it will already have thrown an exception
+		return error_ret_json_from_message("Invalid JSON");
+	}
+	uint64_t height = stoull(json_root.get<string>("height"));
+	monero_fork_rules::set_current_blockchain_height(height);
+	boost::property_tree::ptree root;
+	root.put(ret_json_key__generic_retVal(), true);
+	return ret_json_from_root(root);
+}

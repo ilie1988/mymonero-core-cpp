@@ -83,7 +83,7 @@ bool monero_transfer_utils::is_tx_spendtime_unlocked(
 		uint64_t current_time = static_cast<uint64_t>(time(NULL));
 		// XXX: this needs to be fast, so we'd need to get the starting heights
 		// from the daemon to be correct once voting kicks in
-		uint64_t v2height = nettype == TESTNET ? 624634 : nettype == STAGENET ? (uint64_t)-1/*TODO*/ : 1009827;
+		uint64_t v2height = nettype == TESTNET ? -1/*TODO*/ : nettype == STAGENET ? (uint64_t)-1/*TODO*/ : -1/*TODO*/;
 		uint64_t leeway = block_height < v2height ? CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS_V1 : CRYPTONOTE_LOCKED_TX_ALLOWED_DELTA_SECONDS_V2;
 		if(current_time + leeway >= unlock_time)
 			return true;
@@ -256,7 +256,7 @@ void monero_transfer_utils::send_step1__prepare_params_for_get_decoys(
 	//
 	uint64_t attempt_at_min_fee;
 	if (passedIn_attemptAt_fee == none) {
-		attempt_at_min_fee = estimate_fee(true/*use_per_byte_fee*/, true/*use_rct*/, 2/*est num inputs*/, fake_outs_count, 2, extra.size(), bulletproof, base_fee, fee_multiplier, fee_quantization_mask);
+		attempt_at_min_fee = estimate_fee(use_fork_rules_fn(6, 0) ? true : false, true/*use_rct*/, 2/*est num inputs*/, fake_outs_count, 2, extra.size(), bulletproof, base_fee, fee_multiplier, fee_quantization_mask);
 		// opted to do this instead of `const uint64_t min_fee = (fee_multiplier * base_fee * estimate_tx_size(use_rct, 1, fake_outs_count, 2, extra.size(), bulletproof));`
 		// TODO: estimate with 1 input or 2?
 	} else {
@@ -308,7 +308,7 @@ void monero_transfer_utils::send_step1__prepare_params_for_get_decoys(
 	//
 //	if (/*using_outs.size() > 1*/ && use_rct) { // FIXME? see original core js
 	uint64_t needed_fee = estimate_fee(
-		true/*use_per_byte_fee*/, use_rct,
+		use_fork_rules_fn(6, 0) ? true : false, use_rct,
 		retVals.using_outs.size(), fake_outs_count, /*tx.dsts.size()*/1+1, extra.size(),
 		bulletproof, base_fee, fee_multiplier, fee_quantization_mask
 	);
@@ -346,7 +346,7 @@ void monero_transfer_utils::send_step1__prepare_params_for_get_decoys(
 			//
 			// Recalculate fee, total incl fees
 			needed_fee = estimate_fee(
-				true/*use_per_byte_fee*/, use_rct,
+				use_fork_rules_fn(6, 0) ? true : false, use_rct,
 				retVals.using_outs.size(), fake_outs_count, /*tx.dsts.size()*/1+1, extra.size(),
 				bulletproof, base_fee, fee_multiplier, fee_quantization_mask
 			);
@@ -419,7 +419,7 @@ void monero_transfer_utils::send_step2__try_create_transaction(
 	//
 	size_t blob_size = *create_tx__retVals.txBlob_byteLength;
 	uint64_t fee_actually_needed = calculate_fee(
-		true/*use_per_byte_fee*/,
+		use_fork_rules_fn(6, 0) ? true : false,
 		*create_tx__retVals.tx, blob_size,
 		get_base_fee(fee_per_b)/*i.e. fee_per_b*/,
 		get_fee_multiplier(simple_priority, default_priority(), get_fee_algorithm(use_fork_rules_fn), use_fork_rules_fn),
@@ -463,7 +463,7 @@ void monero_transfer_utils::create_transaction(
 	//
 	uint32_t fake_outputs_count = fixed_mixinsize();
 	bool bulletproof = true;
-	const rct::RangeProofType range_proof_type = bulletproof ? rct::RangeProofPaddedBulletproof : rct::RangeProofBorromean;
+	const rct::RangeProofType range_proof_type = bulletproof && use_fork_rules_fn(6, 0) ? rct::RangeProofPaddedBulletproof : bulletproof ? rct::RangeProofMultiOutputBulletproof : rct::RangeProofBorromean;
 	//
 	if (mix_outs.size() != outputs.size() && fake_outputs_count != 0) {
 		retVals.errCode = wrongNumberOfMixOutsProvided;

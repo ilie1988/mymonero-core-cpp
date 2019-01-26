@@ -40,6 +40,9 @@
 
 namespace monero_fork_rules
 {
+	void set_current_blockchain_height(uint64_t height);
+	uint64_t get_current_blockchain_height();
+	uint64_t get_hardfork_earliest_height(uint8_t version);
 	typedef std::function<bool(uint8_t/*version*/, int64_t/*early_blocks*/)> use_fork_rules_fn_type;
 	//
 	bool lightwallet_hardcoded__use_fork_rules(uint8_t version, int64_t early_blocks); // convenience - to be called by a use_fork_rules_fn_type implementation

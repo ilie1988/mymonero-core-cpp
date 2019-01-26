@@ -54,7 +54,7 @@ uint32_t monero_fee_utils::default_priority()
 uint64_t monero_fee_utils::get_base_fee( // added as of v8
 	uint64_t fee_per_b
 ) {
-	return fee_per_b;
+		return fee_per_b;
 }
 //
 uint64_t monero_fee_utils::estimated_tx_network_fee(
@@ -76,7 +76,7 @@ uint64_t monero_fee_utils::get_upper_transaction_weight_limit(
 	if (upper_transaction_weight_limit__or_0_for_default > 0)
 		return upper_transaction_weight_limit__or_0_for_default;
 	uint64_t full_reward_zone = use_fork_rules_fn(5, 10) ? CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5 : use_fork_rules_fn(2, 10) ? CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2 : CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V1;
-	if (use_fork_rules_fn(8, 10))
+	if (use_fork_rules_fn(6, 10))
 		return full_reward_zone / 2 - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
 	else
 		return full_reward_zone - CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE;
@@ -133,8 +133,6 @@ int monero_fee_utils::get_fee_algorithm(use_fork_rules_fn_type use_fork_rules_fn
 		return 3;
 	if (use_fork_rules_fn(5, 0))
 		return 2;
-	if (use_fork_rules_fn(3, -720 * 14))
-		return 1;
 	return 0;
 }
 size_t monero_fee_utils::estimate_rct_tx_size(int n_inputs, int mixin, int n_outputs, size_t extra_size, bool bulletproof)
@@ -215,7 +213,8 @@ uint64_t monero_fee_utils::estimate_tx_weight(bool use_rct, int n_inputs, int mi
 }
 uint64_t monero_fee_utils::estimate_fee(bool use_per_byte_fee, bool use_rct, int n_inputs, int mixin, int n_outputs, size_t extra_size, bool bulletproof, uint64_t base_fee, uint64_t fee_multiplier, uint64_t fee_quantization_mask)
 {
-	if (use_per_byte_fee)
+	use_fork_rules_fn_type use_fork_rules_fn;
+	if (use_per_byte_fee && use_fork_rules_fn(6, 0))
 	{
 		const size_t estimated_tx_weight = estimate_tx_weight(use_rct, n_inputs, mixin, n_outputs, extra_size, bulletproof);
 		return calculate_fee_from_weight(base_fee, estimated_tx_weight, fee_multiplier, fee_quantization_mask);
@@ -235,7 +234,9 @@ uint64_t monero_fee_utils::calculate_fee_from_weight(uint64_t base_fee, uint64_t
 }
 uint64_t monero_fee_utils::calculate_fee(bool use_per_byte_fee, const cryptonote::transaction &tx, size_t blob_size, uint64_t base_fee, uint64_t fee_multiplier, uint64_t fee_quantization_mask)
 {
-	if (use_per_byte_fee) {
+	use_fork_rules_fn_type use_fork_rules_fn;
+	if (use_per_byte_fee && use_fork_rules_fn(6, 0))
+	{
 		return calculate_fee_from_weight(base_fee, cryptonote::get_transaction_weight(tx, blob_size), fee_multiplier, fee_quantization_mask);
 	} else {
 		return calculate_fee_from_size(base_fee, blob_size, fee_multiplier);
@@ -248,5 +249,14 @@ uint64_t monero_fee_utils::calculate_fee(bool use_per_byte_fee, const cryptonote
 //}
 uint64_t monero_fee_utils::calculate_fee_from_size(uint64_t fee_per_b, size_t bytes, uint64_t fee_multiplier)
 {
+	use_fork_rules_fn_type use_fork_rules_fn;
+	uint64_t kB = (bytes + 1023) / 1024;
+	if (use_fork_rules_fn(6, 0))
+	{
+    return kB * fee_per_b * fee_multiplier;
+	}
+	else
+	{
 	return bytes * fee_per_b * fee_multiplier;
+	}
 }
