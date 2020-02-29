@@ -62,10 +62,6 @@ using namespace monero_fork_rules;
 //
 bool monero_fork_rules::lightwallet_hardcoded__use_fork_rules(uint8_t version, int64_t early_blocks)
 {
-	uint64_t height = get_current_blockchain_height();
-	uint64_t earliest_height = get_hardfork_earliest_height(version);
-	bool close_enough = height >= earliest_height - early_blocks; // start using the rules that many blocks beforehand
-	return close_enough;
 	return true; // TODO - we don't have the actual fork rules from thje lightwallet server yet
 	//
 	// full wallets do:
